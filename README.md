@@ -54,11 +54,18 @@ palette = sns.color_palette("bright", 6)
 
 sns.scatterplot(X_embedded[:,0], X_embedded[:,1], hue=y_train, legend='full', palette=palette)
 
+```
 
+![train_tsne](/images/train_tsne.png)
 
+```python
 #Plot tsne for test data
 X_embedded = tsne.fit_transform(x_test)
 
 palette = sns.color_palette("bright", 6)
 
 sns.scatterplot(X_embedded[:,0], X_embedded[:,1], hue=y_test, legend='full', palette=palette)
+
+```
+
+![test_tsne](/images/test_tsne.png)

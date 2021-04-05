@@ -69,3 +69,108 @@ sns.scatterplot(X_embedded[:,0], X_embedded[:,1], hue=y_test, legend='full', pal
 ```
 
 ![test_tsne](/images/test_tsne.png)
+
+## Grid Search to find optimal K
+
+
+```python
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import GridSearchCV
+In [21]:
+#create new a knn model
+knn2 = KNeighborsClassifier()
+
+#create a dictionary of all values we want to test for n_neighbors
+param_grid = {'n_neighbors': np.arange(1, 20)}
+
+#use gridsearch to test all values for n_neighbors
+knn_gscv = GridSearchCV(knn2, param_grid, cv=5)
+
+#fit model to data
+knn_gscv.fit(x_train, y_train)
+
+#check top performing n_neighbors value
+print(knn_gscv.best_params_)
+print(knn_gscv.best_score_)
+plt.plot(knn_gscv.cv_results_['param_n_neighbors'].data, knn_gscv.cv_results_['mean_test_score'])
+
+```
+
+![grid_search](/images/grid_search.png)
+
+## K-nn from scratch
+
+
+```python
+from collections import Counter
+from sklearn.metrics import accuracy_score
+
+#In the case of KNN, which is a lazy algorithm, the training block reduces 
+#to just memorizing the training data. 
+def train(x_train, y_train):
+    # do nothing 
+    return
+
+def predict(x_train, y_train, x_test, k):
+    # create list for distances and targets
+    distances = []
+    targets = []
+
+    for i in range(len(x_train)):
+        # first we compute the euclidean distance
+        distance = np.sqrt(np.sum(np.square(x_test - x_train[i, :])))
+        # add it to list of distances
+        distances.append([distance, i])
+
+    # sort the list
+    distances = sorted(distances)
+    
+
+    # make a list of the k neighbors' targets
+    for i in range(k):
+        index = distances[i][1]
+        targets.append(y_train[index])
+
+    # return most common target
+    return Counter(targets).most_common(1)[0][0]
+
+def kNearestNeighbor(x_train, y_train, x_test, k):
+    # train on the input data
+    train(x_train, y_train)
+    
+    predictions = []
+
+    # loop over all observations
+    for i in range(len(x_test)):
+        predictions.append(predict(x_train, y_train, x_test[i, :], k))
+        
+    return np.asarray(predictions)
+
+predictions = kNearestNeighbor(x_train, y_train, x_test, 12)
+
+accuracy = accuracy_score(y_test, predictions)
+print('\nThe accuracy of our classifier is {}%'.format(accuracy*100))
+
+```
+
+## K-nn using Sklearn
+
+```python
+
+knn = KNeighborsClassifier(n_neighbors=12)
+
+# fitting the model
+knn.fit(x_train, y_train)
+
+# predict the response
+pred = knn.predict(x_test)
+
+# evaluate accuracy
+print('\nThe accuracy of the classifier is {}%'.format(accuracy_score(y_test, pred)*100))
+
+```
+
+## Results
+
+Using both classifiers , we got the same accuracy of 89.65% for the satellite dataset and optimal k was found to be 12 using GridSearchCV.
